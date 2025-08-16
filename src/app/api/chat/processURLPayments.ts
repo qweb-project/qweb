@@ -1,35 +1,9 @@
 // Helper function for URL payment processing in chat API
-// This is a copy of the function from search API to use in chat API
+// Uses smart contract to fetch payment information instead of hardcoded values
 
 /**
- * Process URL payments for sources
+ * Process URL payments for sources using on-chain data
  */
-/**
- * Extract domain from URL and normalize for payment matching
- */
-function extractDomain(url: string): string {
-  try {
-    const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
-    let hostname = urlObj.hostname.replace(/^www\./, ''); // Remove www. prefix
-    
-    // Normalize Wikipedia subdomains (en.wikipedia.org → wikipedia.org)
-    if (hostname.includes('.wikipedia.org')) {
-      hostname = 'wikipedia.org';
-    }
-    
-    return hostname;
-  } catch {
-    // If URL parsing fails, try to extract domain from string
-    let domain = url.replace(/^https?:\/\/(www\.)?|\/.*$/g, '');
-    
-    // Normalize Wikipedia subdomains for string extraction too
-    if (domain.includes('.wikipedia.org')) {
-      domain = 'wikipedia.org';
-    }
-    
-    return domain;
-  }
-}
 
 export async function processURLPayments(sources: any[], userAddress: string) {
   try {
@@ -59,6 +33,7 @@ export async function processURLPayments(sources: any[], userAddress: string) {
     }
 
     const paymentData = await paymentResponse.json();
+    console.log(`📊 Received payment data:`, paymentData);
     
     if (!paymentData.success) {
       throw new Error(paymentData.error || 'Payment processing failed');
@@ -69,24 +44,24 @@ export async function processURLPayments(sources: any[], userAddress: string) {
       const sourceUrl = source.metadata?.url;
       const paymentInfo = paymentData.payments.find((p: any) => p.url === sourceUrl);
       
-      if (paymentInfo) {
-        return {
-          ...source,
-          metadata: {
-            ...source.metadata,
-            payment: {
-              paid: paymentInfo.paid,
-              amount: paymentInfo.amount,
-              error: paymentInfo.error
-            }
+      return {
+        ...source,
+        metadata: {
+          ...source.metadata,
+          payment: {
+            paid: paymentInfo?.paid || false,
+            amount: paymentInfo?.amount || '0',
+            error: paymentInfo?.error || undefined
           }
-        };
-      }
-      
-      return source;
+        }
+      };
     });
 
     console.log(`✅ Payment processing completed`);
+    console.log(`📊 Sources with payment metadata:`, sourcesWithPayments.map(s => ({
+      url: s.metadata?.url,
+      payment: s.metadata?.payment
+    })));
     return sourcesWithPayments;
 
   } catch (error) {

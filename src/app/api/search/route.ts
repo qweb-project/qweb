@@ -310,21 +310,17 @@ async function processURLPayments(sources: any[], userAddress: string) {
       const sourceUrl = source.metadata?.url;
       const paymentInfo = paymentData.payments.find((p: any) => p.url === sourceUrl);
       
-      if (paymentInfo) {
-        return {
-          ...source,
-          metadata: {
-            ...source.metadata,
-            payment: {
-              paid: paymentInfo.paid,
-              amount: paymentInfo.amount,
-              error: paymentInfo.error
-            }
+      return {
+        ...source,
+        metadata: {
+          ...source.metadata,
+          payment: {
+            paid: paymentInfo?.paid || false,
+            amount: paymentInfo?.amount || '0',
+            error: paymentInfo?.error || undefined
           }
-        };
-      }
-      
-      return source;
+        }
+      };
     });
 
     console.log(`✅ Payment processing completed`);

@@ -112,9 +112,9 @@ const handleEmitterEvents = async (
           })
           .then(response => response.json())
           .then(paymentData => {
-            if (paymentData.success && paymentData.results) {
+            if (paymentData.success && paymentData.payments) {
               // Create payment results by URL
-              paymentData.results.forEach((result: any) => {
+              paymentData.payments.forEach((result: any) => {
                 paymentsData[result.url] = {
                   paid: result.paid,
                   amount: result.amount,
