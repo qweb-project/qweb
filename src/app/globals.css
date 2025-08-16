@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  .overflow-hidden-scrollable {
+    -ms-overflow-style: none;
+  }
+
+  .overflow-hidden-scrollable::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  select,
+  textarea,
+  input {
+    font-size: 16px !important;
+  }
+}
