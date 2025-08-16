@@ -4,6 +4,7 @@ import { useIsSignedIn, useEvmAddress } from "@coinbase/cdp-hooks";
 import { AuthButton } from "@coinbase/cdp-react/components/AuthButton";
 import { Wallet, Copy, Check } from "lucide-react";
 import { useState } from "react";
+import ServerWalletInfo from "./ServerWalletInfo";
 
 interface WalletConnectionProps {
   showFullInterface?: boolean;
@@ -34,9 +35,9 @@ export default function WalletConnection({ showFullInterface = false }: WalletCo
             <h3 className="text-lg font-medium text-black dark:text-white mb-4 text-center">
               Connect Your Wallet
             </h3>
-            <p className="text-sm text-black/70 dark:text-white/70 mb-6 text-center">
-              To use Qweb's advanced AI features, please connect your wallet. It's quick and secure!
-            </p>
+                          <p className="text-sm text-black/70 dark:text-white/70 mb-6 text-center">
+                To use Qweb&apos;s advanced AI features, please connect your wallet. It&apos;s quick and secure!
+              </p>
             <div className="flex justify-center">
               <AuthButton />
             </div>
@@ -87,18 +88,21 @@ export function WalletConnectionHeader() {
   }
   
   return (
-    <div className="flex items-center space-x-1.5 bg-[#24A0ED]/10 dark:bg-[#24A0ED]/20 px-2 py-1 rounded-full border border-[#24A0ED]/20">
-      <Wallet size={12} className="text-[#24A0ED]" />
-      <button 
-        onClick={copyAddress}
-        className="flex items-center space-x-1 text-xs font-medium text-[#24A0ED] hover:text-[#1e88d4] transition-colors"
-        title="Click to copy wallet address"
-      >
-        {isCopied ? <Check size={10} /> : <Copy size={10} />}
-        <span>{evmAddress?.slice(0, 4)}...{evmAddress?.slice(-4)}</span>
-      </button>
-      <div className="h-3 w-px bg-[#24A0ED]/30"></div>
-      <AuthButton />
+    <div className="flex items-center space-x-2">
+      <ServerWalletInfo />
+      <div className="flex items-center space-x-1.5 bg-[#24A0ED]/10 dark:bg-[#24A0ED]/20 px-2 py-1 rounded-full border border-[#24A0ED]/20">
+        <Wallet size={12} className="text-[#24A0ED]" />
+        <button 
+          onClick={copyAddress}
+          className="flex items-center space-x-1 text-xs font-medium text-[#24A0ED] hover:text-[#1e88d4] transition-colors"
+          title="Click to copy wallet address"
+        >
+          {isCopied ? <Check size={10} /> : <Copy size={10} />}
+          <span>{evmAddress?.slice(0, 4)}...{evmAddress?.slice(-4)}</span>
+        </button>
+        <div className="h-3 w-px bg-[#24A0ED]/30"></div>
+        <AuthButton />
+      </div>
     </div>
   );
 }
