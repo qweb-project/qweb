@@ -185,7 +185,7 @@ export async function getWalletBalance(walletAddress: string) {
       } 
       // USDC token - check by symbol 
       else if (item.token.symbol === 'USDC') {
-        usdcBalance = readableAmount.toFixed(2);
+        usdcBalance = readableAmount.toFixed(6);
         console.log(`✅ USDC balance: ${usdcBalance}`);
       }
       
@@ -211,20 +211,32 @@ export async function getWalletBalance(walletAddress: string) {
 /**
  * Send USDC from server wallet to another address
  */
-export async function sendUSDC(fromAddress: string, toAddress: string, amount: string) {
+export async function sendUSDC(fromAccountName: string, toAddress: string, amount: string) {
   try {
     const cdp = getCdpClient();
     
-    // This would be implemented using CDP's transaction sending capabilities
-    // For now, returning a placeholder response
+    console.log(`🔍 sendUSDC: Sending ${amount} USDC from account ${fromAccountName} to ${toAddress}`);
+    
+    // Get the account by name
+    const account = await cdp.evm.getAccount({ name: fromAccountName });
+    
+    // Use the transfer method to send USDC
+    const transferResult = await account.transfer({
+      to: toAddress as `0x${string}`,
+      amount: BigInt(parseFloat(amount) * 1000000), // Convert to USDC units (6 decimals) as BigInt
+      token: "usdc",
+      network: "base-sepolia"
+    });
+    
+    console.log(`✅ USDC transfer successful: ${transferResult.transactionHash}`);
     
     return {
       success: true,
-      transactionHash: '0x...',
-      message: 'USDC transfer initiated'
+      transactionHash: transferResult.transactionHash,
+      amount
     };
-  } catch (error) {
-    console.error('Error sending USDC:', error);
-    throw new Error('Failed to send USDC');
+  } catch (error: any) {
+    console.error('Error sending USDC:', error?.errorMessage || error);
+    throw error;
   }
 }

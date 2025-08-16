@@ -8,10 +8,20 @@ import {
 } from '@headlessui/react';
 import { Document } from '@langchain/core/documents';
 import { File } from 'lucide-react';
-import { Fragment, useState } from 'react';
-
-const MessageSources = ({ sources }: { sources: Document[] }) => {
+import { Fragment, useState, useEffect } from 'react';
+const MessageSources = ({ 
+  sources, 
+  messageId, 
+  payments 
+}: { 
+  sources: Document[]; 
+  messageId?: string;
+  payments?: Record<string, { paid: boolean; amount: string; error?: string }>;
+}) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const paymentsLoading = !payments; // Still loading if payments data hasn't arrived yet
+  
+  // Debug logs removed for production
 
   const closeModal = () => {
     setIsDialogOpen(false);
@@ -32,9 +42,12 @@ const MessageSources = ({ sources }: { sources: Document[] }) => {
           href={source.metadata.url}
           target="_blank"
         >
+          {/* Row 1: Title */}
           <p className="dark:text-white text-xs overflow-hidden whitespace-nowrap text-ellipsis">
             {source.metadata.title}
           </p>
+          
+          {/* Row 2: Icon + Domain + Source Number */}
           <div className="flex flex-row items-center justify-between">
             <div className="flex flex-row items-center space-x-1">
               {source.metadata.url === 'File' ? (
@@ -54,10 +67,40 @@ const MessageSources = ({ sources }: { sources: Document[] }) => {
                 {source.metadata.url.replace(/.+\/\/|www.|\..+/g, '')}
               </p>
             </div>
-            <div className="flex flex-row items-center space-x-1 text-black/50 dark:text-white/50 text-xs">
+            
+            {/* Source number */}
+            <div className="flex items-center space-x-1 text-black/50 dark:text-white/50 text-xs">
               <div className="bg-black/50 dark:bg-white/50 h-[4px] w-[4px] rounded-full" />
               <span>{i + 1}</span>
             </div>
+          </div>
+
+          {/* Row 3: Payment Status */}
+          <div className="flex items-center justify-center">
+            {(() => {
+              const payment = payments?.[source.metadata.url];
+              if (payment?.paid && parseFloat(payment.amount) > 0) {
+                return (
+                  <div className="bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-md border border-green-200 dark:border-green-800 w-full text-center">
+                    <span className="text-green-700 dark:text-green-300 text-xs font-medium">💰 Paid ${payment.amount}</span>
+                  </div>
+                );
+              } else if (!paymentsLoading) {
+                // Show $0 only when payment processing is complete and no payment was made
+                return (
+                  <div className="bg-gray-50 dark:bg-gray-900/20 px-3 py-1.5 rounded-md border border-gray-200 dark:border-gray-800 w-full text-center">
+                    <span className="text-gray-600 dark:text-gray-400 text-xs font-medium">💰 $0</span>
+                  </div>
+                );
+              } else {
+                // Still loading payment data
+                return (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-md border border-blue-200 dark:border-blue-800 w-full text-center">
+                    <span className="text-blue-600 dark:text-blue-400 text-xs font-medium">💰 Processing...</span>
+                  </div>
+                );
+              }
+            })()}
           </div>
         </a>
       ))}
@@ -142,9 +185,38 @@ const MessageSources = ({ sources }: { sources: Document[] }) => {
                               )}
                             </p>
                           </div>
-                          <div className="flex flex-row items-center space-x-1 text-black/50 dark:text-white/50 text-xs">
-                            <div className="bg-black/50 dark:bg-white/50 h-[4px] w-[4px] rounded-full" />
-                            <span>{i + 1}</span>
+                          {/* Modal layout with payment indicator */}
+                          <div className="flex flex-col space-y-2 w-full">
+                            <div className="flex items-center space-x-1 text-black/50 dark:text-white/50 text-xs">
+                              <div className="bg-black/50 dark:bg-white/50 h-[4px] w-[4px] rounded-full" />
+                              <span>{i + 1}</span>
+                            </div>
+                            
+                            {/* Payment status in modal */}
+                            <div className="flex items-center justify-center">
+                              {(() => {
+                                const payment = payments?.[source.metadata.url];
+                                if (payment?.paid && parseFloat(payment.amount) > 0) {
+                                  return (
+                                    <div className="bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-md border border-green-200 dark:border-green-800 w-full text-center">
+                                      <span className="text-green-700 dark:text-green-300 text-xs font-medium">💰 Paid ${payment.amount}</span>
+                                    </div>
+                                  );
+                                } else if (!paymentsLoading) {
+                                  return (
+                                    <div className="bg-gray-50 dark:bg-gray-900/20 px-2 py-1 rounded-md border border-gray-200 dark:border-gray-800 w-full text-center">
+                                      <span className="text-gray-600 dark:text-gray-400 text-xs font-medium">💰 Free</span>
+                                    </div>
+                                  );
+                                } else {
+                                  return (
+                                    <div className="bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-md border border-blue-200 dark:border-blue-800 w-full text-center">
+                                      <span className="text-blue-600 dark:text-blue-400 text-xs font-medium">💰 Processing...</span>
+                                    </div>
+                                  );
+                                }
+                              })()}
+                            </div>
                           </div>
                         </div>
                       </a>

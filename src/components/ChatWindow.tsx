@@ -12,6 +12,8 @@ import { getSuggestions } from '@/lib/actions';
 import { Settings } from 'lucide-react';
 import Link from 'next/link';
 import NextError from 'next/error';
+import { useEvmAddress } from '@coinbase/cdp-hooks';
+import { useServerWalletContext } from '@/context/ServerWalletContext';
 
 export type Message = {
   messageId: string;
@@ -21,6 +23,7 @@ export type Message = {
   role: 'user' | 'assistant';
   suggestions?: string[];
   sources?: Document[];
+  payments?: Record<string, { paid: boolean; amount: string; error?: string }>;
 };
 
 export interface File {
@@ -266,6 +269,8 @@ const loadMessages = async (
 
 const ChatWindow = ({ id }: { id?: string }) => {
   const searchParams = useSearchParams();
+  const { evmAddress } = useEvmAddress();
+  const { refreshBalance } = useServerWalletContext();
   const initialMessage = searchParams.get('q');
 
   const [chatId, setChatId] = useState<string | undefined>(id);
@@ -441,6 +446,19 @@ const ChatWindow = ({ id }: { id?: string }) => {
         setMessageAppeared(true);
       }
 
+      if (data.type === 'payments') {
+        // Update the last assistant message with payment data
+        setMessages((prev) =>
+          prev.map((msg) => {
+            if (msg.messageId === data.messageId && msg.role === 'assistant') {
+              // Payment data updated
+              return { ...msg, payments: data.data };
+            }
+            return msg;
+          }),
+        );
+      }
+
       if (data.type === 'messageEnd') {
         setChatHistory((prevHistory) => [
           ...prevHistory,
@@ -451,6 +469,13 @@ const ChatWindow = ({ id }: { id?: string }) => {
         setLoading(false);
 
         const lastMsg = messagesRef.current[messagesRef.current.length - 1];
+
+        // Refresh wallet balance after search with sources completes (USDC may have been spent)
+        if (lastMsg?.role === 'assistant' && sources && sources.length > 0) {
+          refreshBalance().catch(error => {
+            console.error('Failed to refresh wallet balance after search:', error);
+          });
+        }
 
         const autoImageSearch = localStorage.getItem('autoImageSearch');
         const autoVideoSearch = localStorage.getItem('autoVideoSearch');
@@ -488,6 +513,8 @@ const ChatWindow = ({ id }: { id?: string }) => {
 
     const messageIndex = messages.findIndex((m) => m.messageId === messageId);
 
+    console.log('🔍 ChatWindow: Sending message with userAddress:', evmAddress);
+
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: {
@@ -516,6 +543,7 @@ const ChatWindow = ({ id }: { id?: string }) => {
           provider: embeddingModelProvider.provider,
         },
         systemInstructions: localStorage.getItem('systemInstructions'),
+        userAddress: evmAddress, // Add user address for payment processing
       }),
     });
 

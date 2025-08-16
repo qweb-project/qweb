@@ -1,16 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useIsSignedIn, useEvmAddress } from "@coinbase/cdp-hooks";
+import { useIsSignedIn } from "@coinbase/cdp-hooks";
 import { DollarSign, Loader2, Plus } from "lucide-react";
-import { useServerWallet } from "@/hooks/useServerWallet";
+import { useServerWalletContext } from "@/context/ServerWalletContext";
 import FaucetTestButton from "./FaucetTestButton";
 import BalanceRefreshButton from "./BalanceRefreshButton";
 import TransferModal from "./TransferModal";
 
 export default function ServerWalletInfo() {
   const isSignedIn = useIsSignedIn();
-  const { evmAddress } = useEvmAddress();
   const [showTransferModal, setShowTransferModal] = useState(false);
   
   const {
@@ -20,7 +19,7 @@ export default function ServerWalletInfo() {
     refreshBalance,
     createOrGetWallet,
     isCreating
-  } = useServerWallet(isSignedIn ? evmAddress : null);
+  } = useServerWalletContext();
 
   if (!isSignedIn) {
     return null;
@@ -67,7 +66,7 @@ export default function ServerWalletInfo() {
           </button>
           <DollarSign size={12} className="text-green-600 dark:text-green-400" />
           <span className="text-xs font-medium text-green-700 dark:text-green-300">
-            ${parseFloat(serverWallet.balance.usdc).toFixed(2)} USDC
+            ${parseFloat(serverWallet.balance.usdc).toFixed(4)} USDC
           </span>
           {serverWallet.isNew && (
             <span className="text-xs text-green-600 dark:text-green-400">

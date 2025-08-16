@@ -169,7 +169,11 @@ const MessageBox = ({
                     Sources
                   </h3>
                 </div>
-                <MessageSources sources={message.sources} />
+                <MessageSources 
+                  sources={message.sources} 
+                  messageId={message.messageId}
+                  payments={message.payments}
+                />
               </div>
             )}
             <div className="flex flex-col space-y-2">

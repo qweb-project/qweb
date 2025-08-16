@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useIsSignedIn, useEvmAddress } from '@coinbase/cdp-hooks';
 
 interface ServerWalletBalance {
   eth: string;
@@ -15,7 +16,7 @@ interface ServerWallet {
   balance: ServerWalletBalance;
 }
 
-interface UseServerWalletReturn {
+interface ServerWalletContextType {
   serverWallet: ServerWallet | null;
   loading: boolean;
   error: string | null;
@@ -24,14 +25,20 @@ interface UseServerWalletReturn {
   isCreating: boolean;
 }
 
-export function useServerWallet(userAddress: string | null): UseServerWalletReturn {
+const ServerWalletContext = createContext<ServerWalletContextType | null>(null);
+
+export function ServerWalletProvider({ children }: { children: ReactNode }) {
+  const isSignedIn = useIsSignedIn();
+  const { evmAddress } = useEvmAddress();
+  
   const [serverWallet, setServerWallet] = useState<ServerWallet | null>(null);
   const [loading, setLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
-  const createOrGetWallet = useCallback(async () => {
-    if (!userAddress || isCreating) return;
+  const createOrGetWallet = async () => {
+    if (!evmAddress || isCreating || serverWallet || !isSignedIn) return;
 
     setIsCreating(true);
     setLoading(true);
@@ -45,7 +52,7 @@ export function useServerWallet(userAddress: string | null): UseServerWalletRetu
         },
         body: JSON.stringify({
           action: 'getOrCreate',
-          userAddress,
+          userAddress: evmAddress,
         }),
       });
 
@@ -57,7 +64,6 @@ export function useServerWallet(userAddress: string | null): UseServerWalletRetu
       
       if (data.success) {
         setServerWallet(data.wallet);
-        console.log('Server wallet loaded:', data.wallet);
       } else {
         throw new Error(data.error || 'Unknown error');
       }
@@ -67,11 +73,12 @@ export function useServerWallet(userAddress: string | null): UseServerWalletRetu
     } finally {
       setLoading(false);
       setIsCreating(false);
+      setHasInitialized(true);
     }
-  }, [userAddress, isCreating]);
+  };
 
-  const refreshBalance = useCallback(async () => {
-    if (!serverWallet?.address) return;
+  const refreshBalance = async () => {
+    if (!serverWallet?.address || loading) return;
 
     setLoading(true);
     setError(null);
@@ -90,7 +97,6 @@ export function useServerWallet(userAddress: string | null): UseServerWalletRetu
           ...prev,
           balance: data.balance
         } : null);
-        console.log('Balance refreshed:', data.balance);
       } else {
         throw new Error(data.error || 'Failed to fetch balance');
       }
@@ -100,16 +106,21 @@ export function useServerWallet(userAddress: string | null): UseServerWalletRetu
     } finally {
       setLoading(false);
     }
-  }, [serverWallet?.address]);
+  };
 
-  // Auto-create wallet when user address is available
+  // Initialize wallet only once when user signs in
   useEffect(() => {
-    if (userAddress && !serverWallet && !loading && !isCreating) {
+    if (isSignedIn && evmAddress && !hasInitialized && !serverWallet && !loading && !isCreating) {
       createOrGetWallet();
+    } else if (!isSignedIn) {
+      // Reset state when user signs out
+      setServerWallet(null);
+      setHasInitialized(false);
+      setError(null);
     }
-  }, [userAddress, serverWallet, loading, isCreating, createOrGetWallet]);
+  }, [isSignedIn, evmAddress, hasInitialized]);
 
-  return {
+  const value: ServerWalletContextType = {
     serverWallet,
     loading,
     error,
@@ -117,4 +128,18 @@ export function useServerWallet(userAddress: string | null): UseServerWalletRetu
     createOrGetWallet,
     isCreating,
   };
+
+  return (
+    <ServerWalletContext.Provider value={value}>
+      {children}
+    </ServerWalletContext.Provider>
+  );
+}
+
+export function useServerWalletContext(): ServerWalletContextType {
+  const context = useContext(ServerWalletContext);
+  if (!context) {
+    throw new Error('useServerWalletContext must be used within a ServerWalletProvider');
+  }
+  return context;
 }

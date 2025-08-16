@@ -34,6 +34,7 @@ export interface MetaSearchAgentType {
     optimizationMode: 'speed' | 'balanced' | 'quality',
     fileIds: string[],
     systemInstructions: string,
+    userAddress?: string,
   ) => Promise<eventEmitter>;
 }
 
@@ -472,7 +473,9 @@ class MetaSearchAgent implements MetaSearchAgentType {
     optimizationMode: 'speed' | 'balanced' | 'quality',
     fileIds: string[],
     systemInstructions: string,
+    userAddress?: string,
   ) {
+
     const emitter = new eventEmitter();
 
     const answeringChain = await this.createAnsweringChain(
