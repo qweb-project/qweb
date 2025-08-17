@@ -5,6 +5,8 @@ import { AuthButton } from "@coinbase/cdp-react/components/AuthButton";
 import { Wallet, Copy, Check } from "lucide-react";
 import { useState } from "react";
 import ServerWalletInfo from "./ServerWalletInfo";
+import { ConnectButton } from "../connect-wallet";
+import { ConnectedProfile } from "../connect-wallet/ConnectedProfile";
 
 interface WalletConnectionProps {
   showFullInterface?: boolean;
@@ -58,7 +60,7 @@ export default function WalletConnection({ showFullInterface = false }: WalletCo
           {isCopied ? <Check size={14} /> : <Copy size={14} />}
           <span>{evmAddress?.slice(0, 6)}...{evmAddress?.slice(-4)}</span>
         </button>
-        <AuthButton />
+        <ConnectButton />
       </div>
     );
   }
@@ -70,7 +72,7 @@ export function WalletConnectionHeader() {
   const { isSignedIn } = useIsSignedIn();
   const { evmAddress } = useEvmAddress();
   const [isCopied, setIsCopied] = useState(false);
-
+  const [dropdownOpen, setDropdownOpen] = useState(false)
   const copyAddress = async () => {
     if (evmAddress) {
       await navigator.clipboard.writeText(evmAddress);
@@ -82,27 +84,15 @@ export function WalletConnectionHeader() {
   if (!isSignedIn) {
     return (
       <div className="flex items-center space-x-2">
-        <AuthButton />
+        <ConnectButton />
       </div>
     );
   }
   
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex flex-row items-top justify-between space-x-2">
       <ServerWalletInfo />
-      <div className="flex items-center space-x-1.5 bg-[#24A0ED]/10 dark:bg-[#24A0ED]/20 px-2 py-1 rounded-full border border-[#24A0ED]/20">
-        <Wallet size={12} className="text-[#24A0ED]" />
-        <button 
-          onClick={copyAddress}
-          className="flex items-center space-x-1 text-xs font-medium text-[#24A0ED] hover:text-[#1e88d4] transition-colors"
-          title="Click to copy wallet address"
-        >
-          {isCopied ? <Check size={10} /> : <Copy size={10} />}
-          <span>{evmAddress?.slice(0, 4)}...{evmAddress?.slice(-4)}</span>
-        </button>
-        <div className="h-3 w-px bg-[#24A0ED]/30"></div>
-        <AuthButton />
-      </div>
+      <ConnectedProfile address={evmAddress || ''} dropdownOpen={dropdownOpen} setDropdownOpen={setDropdownOpen} />
     </div>
   );
 }

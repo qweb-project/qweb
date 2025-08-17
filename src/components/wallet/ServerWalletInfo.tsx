@@ -55,16 +55,15 @@ export default function ServerWalletInfo() {
 
   return (
     <>
-      <div className="flex flex-col space-y-2">
-        <div className="flex items-center space-x-2 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-md border border-green-200 dark:border-green-800">
+      <div className="flex flex-col items-center justify-center space-y-2">
+        <div className="flex items-center justify-center min-h-10 translate-y-[-4px] space-x-2 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-md border border-green-200 dark:border-green-800">
           <button
             onClick={() => setShowTransferModal(true)}
-            className="flex items-center justify-center w-4 h-4 bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-400 rounded-full transition-colors"
+            className="flex items-center justify-center w-6 h-6 bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-400 rounded-full transition-colors"
             title="Transfer USDC to server wallet"
           >
-            <Plus size={8} className="text-white" />
+            <Plus size={12} className="text-white" />
           </button>
-          <DollarSign size={12} className="text-green-600 dark:text-green-400" />
           <span className="text-xs font-medium text-green-700 dark:text-green-300">
             ${parseFloat(serverWallet.balance.usdc).toFixed(4)} USDC
           </span>
@@ -74,17 +73,6 @@ export default function ServerWalletInfo() {
             </span>
           )}
         </div>
-      
-      {/* Balance controls */}
-      <div className="flex items-center justify-between">
-        <BalanceRefreshButton 
-          onRefresh={refreshBalance}
-          loading={loading}
-        />
-        <span className="text-xs text-gray-500 dark:text-gray-400">
-          ETH: {parseFloat(serverWallet.balance.eth).toFixed(4)}
-        </span>
-      </div>
       
         {/* Debug: Show faucet test button for new wallets */}
         {/* {process.env.NODE_ENV === 'development' && serverWallet.isNew && (
