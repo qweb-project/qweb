@@ -36,7 +36,9 @@ export function ServerWalletProvider({ children }: { children: ReactNode }) {
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasInitialized, setHasInitialized] = useState(false);
-
+  useEffect(() => {
+    console.log(serverWallet?.balance);
+  }, [serverWallet]);
   const createOrGetWallet = async () => {
     if (!evmAddress || isCreating || serverWallet || !isSignedIn) return;
 
@@ -64,28 +66,37 @@ export function ServerWalletProvider({ children }: { children: ReactNode }) {
       
       if (data.success) {
         setServerWallet(data.wallet);
-        
+        console.log('Server wallet created or retrieved:', data.wallet);
+        console.log('Balance in context after setting:', data.wallet.balance);
         // If this is a new wallet, refresh balance after creation
         if (data.wallet.isNew) {
-          console.log('New wallet detected, refreshing balance...');
-          // Small delay to ensure wallet is fully initialized
           setTimeout(async () => {
+            console.log('Refreshing balance for new wallet...');
+            // Call refresh balance directly with the wallet address instead of relying on state
             try {
-              const balanceResponse = await fetch(`/api/server-wallet?address=${data.wallet.address}`);
-              if (balanceResponse.ok) {
-                const balanceData = await balanceResponse.json();
-                if (balanceData.success) {
-                  setServerWallet(prev => prev ? {
+              const response = await fetch(`/api/server-wallet?address=${data.wallet.address}`);
+              
+              if (!response.ok) {
+                throw new Error('Failed to fetch balance');
+              }
+
+              const balanceData = await response.json();
+              
+              if (balanceData.success) {
+                console.log('Balance refresh response for new wallet:', balanceData.balance);
+                setServerWallet(prev => {
+                  const updated = prev ? {
                     ...prev,
                     balance: balanceData.balance
-                  } : null);
-                  console.log('Balance refreshed for new wallet');
-                }
+                  } : null;
+                  console.log('Updated serverWallet state after new wallet refresh:', updated);
+                  return updated;
+                });
               }
             } catch (err) {
               console.error('Error refreshing balance for new wallet:', err);
             }
-          }, 1000);
+          }, 5000);
         }
       } else {
         throw new Error(data.error || 'Unknown error');
@@ -101,7 +112,7 @@ export function ServerWalletProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshBalance = async () => {
-    if (!serverWallet?.address || loading) return;
+    if (!serverWallet?.address) return;
 
     setLoading(true);
     setError(null);
@@ -116,10 +127,15 @@ export function ServerWalletProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
       
       if (data.success) {
-        setServerWallet(prev => prev ? {
-          ...prev,
-          balance: data.balance
-        } : null);
+        console.log('Balance refresh response:', data.balance);
+        setServerWallet(prev => {
+          const updated = prev ? {
+            ...prev,
+            balance: data.balance
+          } : null;
+          console.log('Updated serverWallet state:', updated);
+          return updated;
+        });
       } else {
         throw new Error(data.error || 'Failed to fetch balance');
       }

@@ -90,9 +90,9 @@ export function ConnectButton({ className }: ConnectProps) {
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/30" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-0 z-40 bg-black/50" onClick={() => setIsOpen(false)} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setIsOpen(false)}>
-            <div className="w-full max-w-sm rounded-xl border border-blue-500 min-h-[40vh] bg-background p-6 shadow-xl flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+            <div className="w-full max-w-sm rounded-xl border border-blue-500 min-h-[40vh] bg-black p-6 shadow-xl flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
               <div className="flex flex-col items-center gap-1">
                 <img src="/logo.png" alt="connect-wallet" className="mx-auto h-14 w-14 mb-4" />
                 <h2 className="text-lg font-medium">Sign in</h2>

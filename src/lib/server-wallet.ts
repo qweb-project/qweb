@@ -119,16 +119,17 @@ async function fundWalletIfNeeded(walletAddress: string) {
     console.log(`Funding wallet ${walletAddress} with testnet tokens...`);
     //check for wallet balance
     const balance = await getWalletBalance(walletAddress);
+    // console.log(`Balance fetched for ${walletAddress}:`, balance);
     // Fund with ETH first (needed for gas)
     try {
-        if (parseFloat(balance.eth) < 0.0001) {
+        // if (parseFloat(balance.eth) < 0.0001) {
       const ethFaucetResult = await cdp.evm.requestFaucet({
         address: walletAddress,
         network: "base-sepolia",
         token: "eth",
       });
       console.log(`✅ ETH faucet transaction: ${ethFaucetResult.transactionHash}`);
-    }
+    // }
       // Wait a moment before requesting USDC
       await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error: any) {
@@ -137,14 +138,14 @@ async function fundWalletIfNeeded(walletAddress: string) {
     
     // Fund with USDC  
     try {
-        if (parseFloat(balance.usdc) < 0.1) {
+        // if (parseFloat(balance.usdc) < 0.1) {
       const usdcFaucetResult = await cdp.evm.requestFaucet({
         address: walletAddress,
         network: "base-sepolia", 
         token: "usdc",
       });
       console.log(`✅ USDC faucet transaction: ${usdcFaucetResult.transactionHash}`);
-    }
+    // }
     } catch (error: any) {
       console.error('❌ Error funding with USDC:', error?.errorMessage || error);
     }

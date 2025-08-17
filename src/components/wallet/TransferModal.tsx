@@ -157,8 +157,8 @@ export default function TransferModal({
   const crossChainTransfer = useCrossChainTransfer();
   
   const [amount, setAmount] = useState('');
-  const [sourceChainId, setSourceChainId] = useState<SupportedChainId>(DEFAULT_CHAIN_ID);
-  const [destinationChainId, setDestinationChainId] = useState<SupportedChainId>(SupportedChainId.ETH_SEPOLIA);
+  const [sourceChainId, setSourceChainId] = useState<SupportedChainId>(SupportedChainId.BASE_SEPOLIA);
+  const [destinationChainId, setDestinationChainId] = useState<SupportedChainId>(SupportedChainId.BASE_SEPOLIA);
   const [destinationAddress, setDestinationAddress] = useState('');
   const [transferType, setTransferType] = useState<'fast' | 'standard'>('standard');
   const [balance, setBalance] = useState<string>('0');
@@ -407,21 +407,23 @@ export default function TransferModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Chain Selection */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <ChainSelect
-              label="From Chain"
-              selectedChainId={sourceChainId}
-              onChainSelect={setSourceChainId}
-            />
-            
-            <div className="relative">
+          <div className="relative">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ChainSelect
+                label="From Chain"
+                selectedChainId={sourceChainId}
+                onChainSelect={setSourceChainId}
+              />
+              
               <ChainSelect
                 label="To Chain"
                 selectedChainId={destinationChainId}
                 onChainSelect={setDestinationChainId}
               />
-              
-              {/* Swap Button */}
+            </div>
+            
+            {/* Swap Button - Positioned between the two dropdowns */}
+            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 hidden md:block">
               <button
                 type="button"
                 onClick={() => {
@@ -429,8 +431,26 @@ export default function TransferModal({
                   setSourceChainId(destinationChainId);
                   setDestinationChainId(temp);
                 }}
-                className="absolute -left-4 top-8 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full p-2 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors z-10"
+                className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full p-2 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-md"
                 disabled={isInProgress}
+                title="Swap chains"
+              >
+                <ArrowUpDown size={16} className="text-gray-500" />
+              </button>
+            </div>
+            
+            {/* Mobile Swap Button */}
+            <div className="flex justify-center mt-2 md:hidden">
+              <button
+                type="button"
+                onClick={() => {
+                  const temp = sourceChainId;
+                  setSourceChainId(destinationChainId);
+                  setDestinationChainId(temp);
+                }}
+                className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full p-2 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                disabled={isInProgress}
+                title="Swap chains"
               >
                 <ArrowUpDown size={16} className="text-gray-500" />
               </button>
@@ -485,7 +505,7 @@ export default function TransferModal({
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 disabled={isInProgress}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white disabled:opacity-50"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white disabled:opacity-50 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
               />
               <div className="absolute right-3 top-2 text-sm text-gray-500 dark:text-gray-400">
                 Balance: {balance}
@@ -493,10 +513,10 @@ export default function TransferModal({
             </div>
           </div>
 
-          {/* Destination Address */}
+          {/* Destination Server Wallet */}
           <div>
             <label htmlFor="destination" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Destination Address
+              Destination Server Wallet
             </label>
             <input
               id="destination"

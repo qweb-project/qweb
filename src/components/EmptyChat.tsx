@@ -5,6 +5,7 @@ import Link from 'next/link';
 import WeatherWidget from './WeatherWidget';
 import NewsArticleWidget from './NewsArticleWidget';
 import WalletConnection, { WalletConnectionHeader } from './wallet/WalletConnection';
+import InfoBanner from './InfoBanner';
 import { useIsSignedIn } from '@coinbase/cdp-hooks';
 
 const EmptyChat = ({
@@ -40,6 +41,11 @@ const EmptyChat = ({
             <Settings className="cursor-pointer lg:hidden" />
           </Link>
         </div>
+      </div>
+      
+      {/* Info Banner - Positioned below header to avoid overlap */}
+      <div className="fixed top-16 left-0 right-0 z-50">
+        <InfoBanner />
       </div>
       <div className="flex flex-col items-center justify-center min-h-screen max-w-screen-sm mx-auto p-2 space-y-4">
         <div className="flex flex-col items-center justify-center w-full space-y-8">

@@ -64,6 +64,7 @@ export default function ServerWalletInfo() {
           >
             <Plus size={12} className="text-white" />
           </button>
+
           <span className="text-xs font-medium text-green-700 dark:text-green-300">
             ${parseFloat(serverWallet.balance.usdc).toFixed(4)} USDC
           </span>
