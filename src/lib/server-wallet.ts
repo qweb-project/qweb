@@ -1,5 +1,7 @@
 import { CdpClient } from "@coinbase/cdp-sdk";
 import { createHash } from "crypto";
+import { toAccount } from "viem/accounts";
+import { wrapFetchWithPayment, decodeXPaymentResponse } from "x402-fetch";
 
 // Initialize CDP client for server wallet operations
 let cdpClient: CdpClient | null = null;
@@ -239,5 +241,153 @@ export async function sendUSDC(fromAccountName: string, toAddress: string, amoun
   } catch (error: any) {
     console.error('Error sending USDC:', error?.errorMessage || error);
     throw error;
+  }
+}
+
+/**
+ * Make x402 payment using server wallet
+ */
+export async function makeX402Payment(url: string, userAddress: string) {
+  try {
+    // Get or create server wallet for the user
+    const walletInfo = await getOrCreateServerWallet(userAddress);
+    
+    console.log(`💼 Using server wallet: ${walletInfo.address} (${walletInfo.name})`);
+    
+    // Get the CDP account by name
+    const cdp = getCdpClient();
+    const serverAccount = await cdp.evm.getAccount({ name: walletInfo.name });
+    
+    // Convert to viem account for x402-fetch
+    const account = toAccount(serverAccount);
+    const fetchWithPayment = wrapFetchWithPayment(fetch, account);
+    
+    // Call the x402 server on port 3001
+    const serverUrl = `http://localhost:3001/api/pay/${encodeURIComponent(url)}`;
+    
+    console.log(`🔄 Making x402 payment request to: ${serverUrl}`);
+
+    const response = await fetchWithPayment(serverUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      }
+    });
+
+    // Extract payment response information
+    const paymentResponseHeader = response.headers.get("x-payment-response");
+    let paymentResponse = null;
+    
+    if (paymentResponseHeader) {
+      paymentResponse = decodeXPaymentResponse(paymentResponseHeader);
+      console.log(`✅ Payment response:`, paymentResponse);
+    }
+
+    const responseData = await response.json();
+
+    return {
+      success: true,
+      statusCode: response.status,
+      data: responseData,
+      paymentResponse,
+      serverWallet: walletInfo.address,
+      walletName: walletInfo.name,
+      url
+    };
+
+  } catch (error: any) {
+    console.error(`❌ x402 payment failed for ${url}:`, error);
+    
+    return {
+      success: false,
+      error: error.message,
+      url
+    };
+  }
+}
+
+/**
+ * Check payment info from x402 server
+ */
+export async function checkPaymentInfo(url: string) {
+  try {
+    const serverUrl = `http://localhost:3001/api/payment-info/${encodeURIComponent(url)}`;
+    
+    console.log(`🔍 Checking payment info: ${serverUrl}`);
+
+    const response = await fetch(serverUrl);
+    const data = await response.json();
+
+    return {
+      success: true,
+      data
+    };
+
+  } catch (error: any) {
+    console.error(`❌ Failed to check payment info for ${url}:`, error);
+    
+    return {
+      success: false,
+      error: error.message,
+      url
+    };
+  }
+}
+
+/**
+ * Process complete x402 payment flow for a URL
+ */
+export async function processUrlPayment(url: string, userAddress: string) {
+  try {
+    console.log(`🚀 Starting x402 payment flow for: ${url}`);
+    
+    // 1. Check payment info
+    console.log('📋 Checking payment requirements...');
+    const paymentInfo = await checkPaymentInfo(url);
+    
+    if (!paymentInfo.success) {
+      return {
+        success: false,
+        error: "Failed to get payment info",
+        step: "payment_info"
+      };
+    }
+
+    if (!paymentInfo.data.paymentRequired) {
+      return {
+        success: true,
+        message: "No payment required for this URL",
+        data: paymentInfo.data,
+        step: "no_payment_needed"
+      };
+    }
+
+    console.log(`💰 Payment required: ${paymentInfo.data.price} to ${paymentInfo.data.payTo}`);
+    
+    // 2. Check wallet balance
+    console.log('💼 Checking server wallet balance...');
+    const walletInfo = await getOrCreateServerWallet(userAddress);
+    const balance = await getWalletBalance(walletInfo.address);
+    console.log(`Wallet balance - ETH: ${balance.eth}, USDC: ${balance.usdc}`);
+    
+    // 3. Make payment
+    console.log('💳 Making x402 payment...');
+    const paymentResult = await makeX402Payment(url, userAddress);
+    
+    return {
+      success: paymentResult.success,
+      paymentInfo: paymentInfo.data,
+      balance,
+      paymentResult,
+      step: "completed"
+    };
+    
+  } catch (error: any) {
+    console.error('❌ Payment flow failed:', error);
+    return {
+      success: false,
+      error: error.message,
+      step: "error"
+    };
   }
 }

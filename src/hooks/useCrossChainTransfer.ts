@@ -48,20 +48,22 @@ interface TransferState {
 const DEFAULT_DECIMALS = 6;
 
 // Helper function to get network name for CDP
-// Note: CDP hooks currently only support base-sepolia and ethereum-sepolia
-function getNetworkFromChainId(chainId: SupportedChainId) {
+function getNetworkFromChainId(chainId: SupportedChainId): string {
   switch (chainId) {
     case SupportedChainId.ETH_SEPOLIA:
-      return 'ethereum-sepolia' as const;
-    case SupportedChainId.BASE_SEPOLIA:
-      return 'base-sepolia' as const;
+      return 'ethereum-sepolia';
     case SupportedChainId.ARB_SEPOLIA:
+      return 'arbitrum-sepolia';
+    case SupportedChainId.BASE_SEPOLIA:
+      return 'base-sepolia';
     case SupportedChainId.OP_SEPOLIA:
+      return 'optimism-sepolia';
     case SupportedChainId.AVAX_FUJI:
+      return 'avalanche-fuji';
     case SupportedChainId.POLYGON_AMOY:
+      return 'polygon-amoy';
     default:
-      // Fallback to base-sepolia for unsupported networks
-      return 'base-sepolia' as const;
+      throw new Error(`Unsupported chain ID: ${chainId}`);
   }
 }
 
@@ -271,7 +273,7 @@ export function useCrossChainTransfer() {
     try {
       const result = await sendEvmTransaction({
         evmAccount: evmAddress,
-        network: getNetworkFromChainId(chainId),
+        network: getNetworkFromChainId(chainId) as any,
         transaction: {
           to: usdcAddress as Hex,
           data: encodeFunctionData({
@@ -326,7 +328,7 @@ export function useCrossChainTransfer() {
 
       const result = await sendEvmTransaction({
         evmAccount: evmAddress,
-        network: getNetworkFromChainId(sourceChainId),
+        network: getNetworkFromChainId(sourceChainId) as any,
         transaction: {
           to: tokenMessenger as Hex,
           data: encodeFunctionData({
@@ -437,7 +439,7 @@ export function useCrossChainTransfer() {
     try {
       const result = await sendEvmTransaction({
         evmAccount: evmAddress,
-        network: getNetworkFromChainId(destinationChainId),
+        network: getNetworkFromChainId(destinationChainId) as any,
         transaction: {
           to: messageTransmitter as Hex,
           data: encodeFunctionData({
