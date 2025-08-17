@@ -69,38 +69,46 @@ const loadConfig = () => {
 };
 
 export const getSimilarityMeasure = () =>
-  loadConfig().GENERAL.SIMILARITY_MEASURE;
+  process.env.SIMILARITY_MEASURE || loadConfig().GENERAL?.SIMILARITY_MEASURE || 'cosine';
 
-export const getKeepAlive = () => loadConfig().GENERAL.KEEP_ALIVE;
+export const getKeepAlive = () => 
+  process.env.KEEP_ALIVE || loadConfig().GENERAL?.KEEP_ALIVE || '5m';
 
-export const getOpenaiApiKey = () => loadConfig().MODELS.OPENAI.API_KEY;
+export const getOpenaiApiKey = () => 
+  process.env.OPENAI_API_KEY || loadConfig().MODELS?.OPENAI?.API_KEY;
 
-export const getGroqApiKey = () => loadConfig().MODELS.GROQ.API_KEY;
+export const getGroqApiKey = () => 
+  process.env.GROQ_API_KEY || loadConfig().MODELS?.GROQ?.API_KEY;
 
-export const getAnthropicApiKey = () => loadConfig().MODELS.ANTHROPIC.API_KEY;
+export const getAnthropicApiKey = () => 
+  process.env.ANTHROPIC_API_KEY || loadConfig().MODELS?.ANTHROPIC?.API_KEY;
 
-export const getGeminiApiKey = () => loadConfig().MODELS.GEMINI.API_KEY;
+export const getGeminiApiKey = () => 
+  process.env.GEMINI_API_KEY || loadConfig().MODELS?.GEMINI?.API_KEY;
 
 export const getSearxngApiEndpoint = () =>
-  process.env.SEARXNG_API_URL || loadConfig().API_ENDPOINTS.SEARXNG;
+  process.env.SEARXNG_API_URL || loadConfig().API_ENDPOINTS?.SEARXNG;
 
-export const getOllamaApiEndpoint = () => loadConfig().MODELS.OLLAMA.API_URL;
+export const getOllamaApiEndpoint = () => 
+  process.env.OLLAMA_API_URL || loadConfig().MODELS?.OLLAMA?.API_URL;
 
-export const getDeepseekApiKey = () => loadConfig().MODELS.DEEPSEEK.API_KEY;
+export const getDeepseekApiKey = () => 
+  process.env.DEEPSEEK_API_KEY || loadConfig().MODELS?.DEEPSEEK?.API_KEY;
 
-export const getAimlApiKey = () => loadConfig().MODELS.AIMLAPI.API_KEY;
+export const getAimlApiKey = () => 
+  process.env.AIMLAPI_API_KEY || loadConfig().MODELS?.AIMLAPI?.API_KEY;
 
 export const getCustomOpenaiApiKey = () =>
-  loadConfig().MODELS.CUSTOM_OPENAI.API_KEY;
+  process.env.CUSTOM_OPENAI_API_KEY || loadConfig().MODELS?.CUSTOM_OPENAI?.API_KEY;
 
 export const getCustomOpenaiApiUrl = () =>
-  loadConfig().MODELS.CUSTOM_OPENAI.API_URL;
+  process.env.CUSTOM_OPENAI_API_URL || loadConfig().MODELS?.CUSTOM_OPENAI?.API_URL;
 
 export const getCustomOpenaiModelName = () =>
-  loadConfig().MODELS.CUSTOM_OPENAI.MODEL_NAME;
+  process.env.CUSTOM_OPENAI_MODEL_NAME || loadConfig().MODELS?.CUSTOM_OPENAI?.MODEL_NAME;
 
 export const getLMStudioApiEndpoint = () =>
-  loadConfig().MODELS.LM_STUDIO.API_URL;
+  process.env.LM_STUDIO_API_URL || loadConfig().MODELS?.LM_STUDIO?.API_URL;
 
 const mergeConfigs = (current: any, update: any): any => {
   if (update === null || update === undefined) {
