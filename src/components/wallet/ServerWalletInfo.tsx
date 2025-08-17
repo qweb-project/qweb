@@ -87,9 +87,9 @@ export default function ServerWalletInfo() {
       </div>
       
         {/* Debug: Show faucet test button for new wallets */}
-        {process.env.NODE_ENV === 'development' && serverWallet.isNew && (
+        {/* {process.env.NODE_ENV === 'development' && serverWallet.isNew && (
           <FaucetTestButton />
-        )}
+        )} */}
       </div>
 
       {/* Transfer Modal */}

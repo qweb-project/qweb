@@ -64,6 +64,29 @@ export function ServerWalletProvider({ children }: { children: ReactNode }) {
       
       if (data.success) {
         setServerWallet(data.wallet);
+        
+        // If this is a new wallet, refresh balance after creation
+        if (data.wallet.isNew) {
+          console.log('New wallet detected, refreshing balance...');
+          // Small delay to ensure wallet is fully initialized
+          setTimeout(async () => {
+            try {
+              const balanceResponse = await fetch(`/api/server-wallet?address=${data.wallet.address}`);
+              if (balanceResponse.ok) {
+                const balanceData = await balanceResponse.json();
+                if (balanceData.success) {
+                  setServerWallet(prev => prev ? {
+                    ...prev,
+                    balance: balanceData.balance
+                  } : null);
+                  console.log('Balance refreshed for new wallet');
+                }
+              }
+            } catch (err) {
+              console.error('Error refreshing balance for new wallet:', err);
+            }
+          }, 1000);
+        }
       } else {
         throw new Error(data.error || 'Unknown error');
       }

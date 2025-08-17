@@ -10,6 +10,12 @@
 
 *Revolutionizing the web by incentivizing content creation through crypto micropayments*
 
+## 🌐 Live Applications
+
+**🔗 Main Application**: [https://definitely-glowing-mutt.ngrok-free.app](https://definitely-glowing-mutt.ngrok-free.app)
+
+**🏪 Provider Portal**: [https://provider-portal-peach.vercel.app](https://provider-portal-peach.vercel.app)
+
 </div>
 
 ## 🚀 Overview
@@ -28,7 +34,8 @@ Qweb is pioneering a new era of sustainable web search by addressing a critical 
 Qweb transforms web crawling from an extractive process into a **mutually beneficial ecosystem**:
 
 - **Pay-per-crawl model**: Websites receive instant compensation for their content
-- **Crypto micropayments**: Fast, cheap transactions using stablecoins through x402 protocol
+- **Crypto micropayments**: Fast, cheap transactions using USDC stablecoins through x402 protocol
+- **Provider Portal**: Easy monetization through our [Provider Portal](https://provider-portal-peach.vercel.app/) - websites simply list their URL and desired USDC payment amount
 - **Incentivized optimization**: Websites are motivated to create better content and optimize for LLMs
 - **Sustainable web economy**: Creating a future where content creation is directly rewarded
 
@@ -54,8 +61,9 @@ We're building toward an era where:
 
 ### 💰 **Sustainable Payment System**
 - **Instant Micropayments**: Pay websites immediately upon crawling using x402 protocol
-- **Stablecoin Transactions**: Reliable, predictable payments using stable cryptocurrencies
-- **Website Portal**: Simple registration and payment setup for content creators
+- **USDC Payments**: Reliable, predictable payments using USDC stablecoin across multiple chains
+- **Provider Portal**: Simple registration at [provider-portal-peach.vercel.app](https://provider-portal-peach.vercel.app/) - just list your URL and desired USDC amount
+- **Cross-chain Support**: Use USDC from any supported chain through Circle's CCTP protocol
 - **Transparent Pricing**: Clear, fair compensation based on content quality and relevance
 
 ### 🤖 **AI-Powered Intelligence**
@@ -73,22 +81,36 @@ We're building toward an era where:
 
 Ready to set up Qweb? Check out our comprehensive [Development Guide](DEV.md) for detailed installation instructions, configuration, and setup steps.
 
-## 🏗️ Architecture
+## 🏗️ Architecture & Technical Stack
 
-Qweb is built on a modern, scalable architecture:
+Qweb is built on a modern, scalable architecture with integrated crypto payment infrastructure:
 
+### Core Application
 - **Frontend**: Next.js with TypeScript and Tailwind CSS
 - **Backend**: Next.js API routes with serverless functions
 - **Search Engine**: SearXNG for comprehensive web search
 - **AI Models**: Multiple provider support (OpenAI, Ollama, Anthropic, etc.)
 - **Database**: Drizzle ORM with SQLite/PostgreSQL
-- **Payments**: x402 protocol for crypto micropayments
+
+### Payment Infrastructure
+- **Wallet System**: Coinbase embedded wallets for seamless user authentication and onboarding
+- **Server Wallets**: Individual server-side wallets created for each user to enable automated x402 payments
+- **Payment Protocol**: [x402-qweb implementation](https://github.com/qweb-project/x402-qweb) for website micropayments
+- **Cross-chain USDC**: Circle's CCTP (Cross-Chain Transfer Protocol) SDK for multi-chain USDC support
+- **Provider Portal**: Dedicated platform for websites to monetize their content
+
+### How It Works
+1. **User Authentication**: Users log in using Coinbase embedded wallets
+2. **Server Wallet Creation**: Each user gets a dedicated server-side wallet for automated payments
+3. **Search & Pay**: Our meta search agent uses the server wallet to pay x402 requests to participating websites
+4. **Cross-chain Flexibility**: Users can fund their wallets with USDC from any supported blockchain
+5. **Website Monetization**: Content creators register via our Provider Portal to receive payments
 
 For more details, see our [architecture documentation](docs/architecture/README.md).
 
-## 🌐 Usage
+## 🛠️ Local Development
 
-Once set up, you can use Qweb as your default search engine or integrate it via our API. See [DEV.md](DEV.md) for usage instructions and browser integration steps.
+Once set up locally, you can use Qweb as your default search engine or integrate it via our API. See [DEV.md](DEV.md) for usage instructions and browser integration steps.
 
 ## 📊 API Usage
 
@@ -110,6 +132,15 @@ We welcome contributions from the community! See our [Contributing Guide](CONTRI
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## 🔗 Qweb Ecosystem
+
+Explore our complete ecosystem of repositories in the [qweb-project organization](https://github.com/qweb-project):
+
+- **[x402-qweb](https://github.com/qweb-project/x402-qweb)**: Core x402 protocol implementation for website micropayments
+- **[qweb-contracts](https://github.com/qweb-project/qweb-contracts)**: Smart contracts powering the payment infrastructure
+- **[providers-portal](https://github.com/qweb-project/providers-portal)**: Website monetization platform for content creators
+- **Additional implementations**: Various supporting tools and integrations
+
 ## 🙏 Acknowledgments
 
 Qweb stands on the shoulders of giants. We're grateful to the open-source community:
@@ -117,6 +148,8 @@ Qweb stands on the shoulders of giants. We're grateful to the open-source commun
 - **[Perplexica](https://github.com/ItzCrazyKns/Perplexica)**: The foundation and boilerplate for our AI-powered search engine. Their open-source approach made Qweb possible.
 - **[SearXNG](https://github.com/searxng/searxng)**: Our search backend that provides comprehensive, privacy-respecting web search capabilities.
 - **[Ollama](https://ollama.ai)**: Local LLM support for privacy-focused AI inference.
+- **[Coinbase](https://www.coinbase.com/developer-platform)**: Embedded wallet infrastructure for seamless user onboarding.
+- **[Circle](https://www.circle.com/en/cross-chain-transfer-protocol)**: CCTP protocol enabling cross-chain USDC transfers.
 
 The open-source community continues to drive innovation and make projects like Qweb possible. Thank you! 🚀
 
